@@ -93,7 +93,7 @@ public:
                         CircularBufferFilterW<uint16_t>::getBufferAt(nbr[i]),
                         CircularBufferFilterW<uint16_t>::getBufferAt(nbr[i - 1])
                     );
-            }
+            } 
 
             /* and
                return the value else

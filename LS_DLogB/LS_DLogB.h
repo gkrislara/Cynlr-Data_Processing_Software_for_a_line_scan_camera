@@ -71,9 +71,9 @@ public:
 	std::array<Pixel, 2> core(std::array <Pixel, 2>& data) override
 	{
 
-		std::wcout << "Pixel[0]: " << " col: " << data[0].col << " row: " << data[0].row << " value: " << data[0].value << " label: " << data[0].label.labelValue << std::endl;
+		std::wcout << "Pixel[0]: " << " col: " << data[0].col << " row: " << data[0].row << " value: " << data[0].value << " label: " << data[0].label << std::endl;
 
-		std::wcout << "Pixel[1]: " << " col: " << data[1].col << " row: " << data[1].row << " value: " << data[1].value << " label: " << data[1].label.labelValue << std::endl;
+		std::wcout << "Pixel[1]: " << " col: " << data[1].col << " row: " << data[1].row << " value: " << data[1].value << " label: " << data[1].label << std::endl;
 
 		//Clear the internal buffer
 		std::wcout.flush();

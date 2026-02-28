@@ -170,7 +170,7 @@ public:
 			
 			sourceData[i].value = static_cast<uint8_t>(dataGen->gen());
 			nextcoordinate(&sourceData[i].col, &sourceData[i].row);
-			sourceData[i].label.labelValue = 0;
+			sourceData[i].label = 0;
 		}
 
 		return sourceData;

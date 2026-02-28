@@ -104,9 +104,9 @@ public:
 		
 		for (uint8_t i = 0; i < data.size(); i++) // for larger sizes loop unrolling can be done
 		{
-			annotator->push(static_cast<uint16_t>(data[i].label.labelValue));
+			annotator->push(static_cast<uint16_t>(data[i].label));
 			
-            annotator->algorithm(static_cast<uint16_t>(data[i].label.labelValue), static_cast<uint16_t>(data[i].row), static_cast<uint16_t>(data[i].col));
+            annotator->algorithm(static_cast<uint16_t>(data[i].label), static_cast<uint16_t>(data[i].row), static_cast<uint16_t>(data[i].col));
 		}
 
 		return data;
