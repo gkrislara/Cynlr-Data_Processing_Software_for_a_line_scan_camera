@@ -1,0 +1,115 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Header Files\UserInterface">
+      <UniqueIdentifier>{1192f76a-9d14-4c92-b4bb-77803f9bdb7f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Stream">
+      <UniqueIdentifier>{95af7a85-38ca-4bd7-909f-168b9858855a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Platform">
+      <UniqueIdentifier>{994016f7-d02d-4122-9aa8-f4e00517928f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Platform\IOInterface">
+      <UniqueIdentifier>{78dc5f7c-aa15-401c-90fc-e1aae6d39cd7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Platform\Process">
+      <UniqueIdentifier>{352e4d73-eece-40c8-ac1a-9fee801df77c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\DataGenerator">
+      <UniqueIdentifier>{61eac8a0-567a-4db7-8acd-baea04737e67}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="IOClient.h">
+      <Filter>Header Files\Platform\IOInterface</Filter>
+    </ClInclude>
+    <ClInclude Include="IOInterface.h">
+      <Filter>Header Files\Platform\IOInterface</Filter>
+    </ClInclude>
+    <ClInclude Include="IOServer.h">
+      <Filter>Header Files\Platform\IOInterface</Filter>
+    </ClInclude>
+    <ClInclude Include="ProcessManager.h">
+      <Filter>Header Files\Platform\Process</Filter>
+    </ClInclude>
+    <ClInclude Include="ProcessCommon.h">
+      <Filter>Header Files\Platform\Process</Filter>
+    </ClInclude>
+    <ClInclude Include="UserInterfaceCommon.h">
+      <Filter>Header Files\UserInterface</Filter>
+    </ClInclude>
+    <ClInclude Include="UserInterfacePlatform.h">
+      <Filter>Header Files\UserInterface</Filter>
+    </ClInclude>
+    <ClInclude Include="ProcessClient.h">
+      <Filter>Header Files\Platform\Process</Filter>
+    </ClInclude>
+    <ClInclude Include="StreamSource.h">
+      <Filter>Header Files\Stream</Filter>
+    </ClInclude>
+    <ClInclude Include="StreamFilter.h">
+      <Filter>Header Files\Stream</Filter>
+    </ClInclude>
+    <ClInclude Include="Platform.h">
+      <Filter>Header Files\Platform</Filter>
+    </ClInclude>
+    <ClInclude Include="json.hpp">
+      <Filter>Header Files\UserInterface</Filter>
+    </ClInclude>
+    <ClInclude Include="csv.hpp">
+      <Filter>Header Files\DataGenerator</Filter>
+    </ClInclude>
+    <ClInclude Include="Data.h">
+      <Filter>Header Files\DataGenerator</Filter>
+    </ClInclude>
+    <ClInclude Include="CSVDataGenerator.h">
+      <Filter>Header Files\DataGenerator</Filter>
+    </ClInclude>
+    <ClInclude Include="DataGeneratorBase.h">
+      <Filter>Header Files\DataGenerator</Filter>
+    </ClInclude>
+    <ClInclude Include="RandomNumberGenerator.h">
+      <Filter>Header Files\DataGenerator</Filter>
+    </ClInclude>
+    <ClInclude Include="StreamSink.h">
+      <Filter>Header Files\Stream</Filter>
+    </ClInclude>
+    <ClInclude Include="DataGeneratorFactory.h">
+      <Filter>Header Files\DataGenerator</Filter>
+    </ClInclude>
+    <ClInclude Include="clientLookup.h">
+      <Filter>Header Files\Platform</Filter>
+    </ClInclude>
+    <ClInclude Include="StreamProcess.h">
+      <Filter>Header Files\Stream</Filter>
+    </ClInclude>
+    <ClInclude Include="UserInterfaceClient.h">
+      <Filter>Header Files\UserInterface</Filter>
+    </ClInclude>
+    <ClInclude Include="argparse.hpp">
+      <Filter>Header Files\UserInterface</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="schema.json">
+      <Filter>Header Files\UserInterface</Filter>
+    </None>
+    <None Include="..\Test\random10.csv" />
+    <None Include="schema_d.json">
+      <Filter>Header Files\UserInterface</Filter>
+    </None>
+  </ItemGroup>
+</Project>

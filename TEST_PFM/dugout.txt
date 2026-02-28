@@ -1,0 +1,232 @@
+﻿
+
+#pragma once
+#include "..\Shared\ProcessClient.h"
+#include <map>
+#include <queue>
+#include <vector>
+#include <string>
+#include <mutex>
+#include <thread>
+#include <atomic>
+#include <condition_variable>
+#include <iostream>
+#include <array>
+#include <windows.h>
+
+#define DEFAULT_STRPROC_PIPESERVER L"\\\\.\\pipe\\DOWNSTREAM"
+#define DEFAULT_AUXSTRPROC_PIPESERVER L"\\\\.\\pipe\\_"
+
+typedef enum class direction {
+	UPSTREAM,
+	DOWNSTREAM
+} interfaceDirection;
+
+template <typename T, size_t streamWidth>
+class StreamProcess : public ProcessClient<wchar_t> {
+	// --- Main Data Path (unchanged) ---
+	struct UpstreamChannel {
+		explicit UpstreamChannel(HANDLE h) : pipe(h) {}
+		HANDLE pipe;
+		HANDLE event;
+		std::queue<std::array<T, streamWidth>> dataQueue;
+		std::mutex mtx;
+		std::thread readerThread;
+	};
+	struct DownstreamChannel {
+		explicit DownstreamChannel(HANDLE h) : pipe(h) {}
+		HANDLE pipe;
+		HANDLE event;
+		std::queue<std::array<T, streamWidth>> dataQueue;
+		std::mutex mtx;
+		std::thread writerThread;
+		std::atomic<bool> stop{ false };
+	};
+
+	std::unordered_map<HANDLE, HANDLE> routingMap_;
+	std::vector<UpstreamChannel> upstreamChannels_;
+	std::vector<bool> upstreamChannelStatus;
+	std::unordered_map<HANDLE, DownstreamChannel> writerMap_;
+	std::vector<bool> downstreamChannelStatus;
+	HANDLE hStop;
+	std::thread dispatcherThread_;
+
+	// --- Aux Channel Support ---
+	struct AuxChannel {
+		HANDLE pipe = INVALID_HANDLE_VALUE;
+		HANDLE event = nullptr;
+		std::queue<std::vector<uint8_t>> dataQueue;
+		std::mutex mtx;
+		interfaceDirection dir;
+		std::thread ioThread;
+		std::atomic<bool> enabled{ false };
+		std::atomic<bool> stop{ false };
+	};
+	std::unordered_map<std::string, AuxChannel> auxChannels_;
+
+	// --- Aux Channel Management ---
+	void createAuxChannel(const std::string& name, const std::wstring& pipeName,interfaceDirection dir ) {
+		if (auxChannels_.count(name)) {
+			return; // Already exists
+		}
+
+		if(dir == interfaceDirection::UPSTREAM) {
+			// Create client pipe for UPSTREAM
+			HANDLE pipe = CreateFileW(
+				pipeName.c_str(),
+				GENERIC_READ,
+				0,
+				nullptr,
+				OPEN_EXISTING,
+				0,
+				nullptr
+			);
+			if (pipe == INVALID_HANDLE_VALUE) {
+				std::wcerr << L"CreateFileW failed for aux: " << pipeName << std::endl;
+				return;
+			}
+			AuxChannel aux;
+			aux.pipe = pipe;
+			aux.event = CreateEvent(nullptr, FALSE, FALSE, nullptr);
+			aux.enabled = false;
+			aux.stop = false;
+			auxChannels_[name] = std::move(aux);
+			return;
+		}
+		else if (dir == interfaceDirection::DOWNSTREAM)
+		{
+			HANDLE pipe = CreateNamedPipeW(
+				pipeName.c_str(),
+				PIPE_ACCESS_OUTBOUND,
+				PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE | PIPE_WAIT,
+				PIPE_UNLIMITED_INSTANCES,
+				4096, 4096, INFINITE, nullptr
+			);
+			if (pipe == INVALID_HANDLE_VALUE) {
+				std::wcerr << L"CreateNamedPipeW failed for aux: " << pipeName << std::endl;
+				return;
+			}
+			AuxChannel aux;
+			aux.pipe = pipe;
+			aux.event = CreateEvent(nullptr, FALSE, FALSE, nullptr);
+			aux.enabled = false;
+			aux.stop = false;
+			auxChannels_[name] = std::move(aux);
+		}
+	}
+	void startAuxChannels() {
+		for (auto& kv : auxChannels_) {
+			auto& aux = kv.second;
+			aux.stop = false;
+			aux.readerThread = std::thread(&StreamProcess::auxReaderThreadFunc, this, std::ref(aux));
+			aux.writerThread = std::thread(&StreamProcess::auxWriterThreadFunc, this, std::ref(aux));
+		}
+	}
+	void stopAuxChannels() {
+		for (auto& kv : auxChannels_) {
+			auto& aux = kv.second;
+			aux.stop = true;
+			SetEvent(aux.event);
+			if (aux.readerThread.joinable()) aux.readerThread.join();
+			if (aux.writerThread.joinable()) aux.writerThread.join();
+			if (aux.event) CloseHandle(aux.event);
+			if (aux.pipe != INVALID_HANDLE_VALUE) CloseHandle(aux.pipe);
+		}
+	}
+	// Aux Reader: reads from pipe, pushes to queue, signals event
+	void auxReaderThreadFunc(AuxChannel& aux) {
+		while (!aux.stop) {
+			std::vector<uint8_t> buffer(4096);
+			DWORD read = 0;
+			BOOL ok = ReadFile(aux.pipe, buffer.data(), static_cast<DWORD>(buffer.size()), &read, nullptr);
+			if (!ok || read == 0) {
+				std::this_thread::sleep_for(std::chrono::milliseconds(10));
+				continue;
+			}
+			buffer.resize(read);
+			{
+				std::lock_guard<std::mutex> lk(aux.mtx);
+				aux.dataQueue.push(buffer);
+			}
+			SetEvent(aux.event);
+		}
+	}
+	// Aux Writer: pops from queue, writes to pipe
+	void auxWriterThreadFunc(AuxChannel& aux) {
+		while (!aux.stop) {
+			DWORD waitResult = WaitForSingleObject(aux.event, INFINITE);
+			if (waitResult != WAIT_OBJECT_0) break;
+			std::vector<uint8_t> data;
+			{
+				std::lock_guard<std::mutex> lk(aux.mtx);
+				if (aux.dataQueue.empty()) {
+					ResetEvent(aux.event);
+					continue;
+				}
+				data = std::move(aux.dataQueue.front());
+				aux.dataQueue.pop();
+				if (aux.dataQueue.empty()) ResetEvent(aux.event);
+			}
+			DWORD written = 0;
+			WriteFile(aux.pipe, data.data(), static_cast<DWORD>(data.size()), &written, nullptr);
+		}
+	}
+
+	void enableAuxChannel(const std::string& name, bool enable, interfaceDirection dir) {
+		if (auxChannels_.count(name)) {
+			auxChannels_[name].enabled = enable;
+		}
+		else
+		{
+			// Create the Aux Channel if it doesn't exist
+			std::wstring pipeName = DEFAULT_AUXSTRPROC_PIPESERVER + std::wstring(name.begin(), name.end());
+			createAuxChannel(name, pipeName, dir);
+			auxChannels_[name].enabled = enable;
+		}
+	}
+
+protected:
+	// --- Aux API for Derived Classes ---
+	HANDLE getAuxEvent(const std::string& name) {
+		auto it = auxChannels_.find(name);
+		return (it != auxChannels_.end()) ? it->second.event : nullptr;
+	}
+	bool popAuxData(const std::string& name, std::vector<uint8_t>& out) {
+		auto it = auxChannels_.find(name);
+		if (it == auxChannels_.end()) return false;
+		std::lock_guard<std::mutex> lk(it->second.mtx);
+		if (it->second.dataQueue.empty()) return false;
+		out = std::move(it->second.dataQueue.front());
+		it->second.dataQueue.pop();
+		return true;
+	}
+	void sendAux(const std::string& name, const std::vector<uint8_t>& data) {
+		auto it = auxChannels_.find(name);
+		if (it == auxChannels_.end()) return;
+		AuxChannel& aux = it->second;
+		if(!aux.enabled) return;
+		{
+			std::lock_guard<std::mutex> lk(aux.mtx);
+			aux.dataQueue.push(data);
+		}
+		SetEvent(aux.event);
+	}
+
+	void enableAux(const std::string& name, bool enable) {
+		enableAuxChannel(name, enable);
+	}
+
+public:
+	// ...existing main data path code (upstream/downstream setup, dispatcher, etc.)...
+
+	void start() {
+		// ...existing...
+		startAuxChannels();
+	}
+	void stop() {
+		// ...existing...
+		stopAuxChannels();
+	}
+
+	// ...rest of your StreamProcess...
+};

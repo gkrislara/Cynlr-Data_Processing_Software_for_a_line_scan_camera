@@ -1,0 +1,54 @@
+@startuml name CynlrPS-HLSeq
+
+participant "Platform" as PFM_PP #LightGreen
+participant "LSDGB" as LSDGB_CP #LightBlue
+participant "LSDFB" as LSDFB_CP #LightBlue
+participant "LSDLB" as LSDLB_CP #LightBlue
+participant "LSDAB" as LSDAB_CP #LightBlue
+participant "Sink" as SINK_CP #LightBlue
+
+PFM_PP -> PFM_PP : Initialise IOServer (NamedPipeServer)
+PFM_PP -> PFM_PP : Load ConfigJson
+PFM_PP -> PFM_PP : Parse ConfigJson
+PFM_PP -> LSDGB_CP : Spawn LSDGB
+LSDGB_CP -> LSDGB_CP : Initialise IOClient (NammedPipeClient)
+LSDGB_CP -> PFM_PP : Connect IOClient to IOServer 
+PFM_PP <-> LSDGB_CP : Ping/Pong
+PFM_PP -> PFM_PP : Register LSDGB
+
+PFM_PP -> LSDFB_CP : Spawn LSDFB
+LSDFB_CP -> LSDFB_CP : Initialise IOClient (NammedPipeClient)
+LSDFB_CP -> PFM_PP : Connect IOClient to IOServer 
+PFM_PP <-> LSDFB_CP : Ping/Pong
+PFM_PP -> PFM_PP : Register LSDFB
+
+LSDGB_CP <-> LSDFB_CP : Handshake with upstream app 
+
+PFM_PP -> LSDLB_CP : Spawn LSDLB
+LSDLB_CP -> LSDLB_CP : Initialise IOClient (NammedPipeClient)
+LSDLB_CP -> PFM_PP : Connect IOClient to IOServer 
+PFM_PP <-> LSDLB_CP : Ping/Pong
+PFM_PP -> PFM_PP : Register LSDFB
+
+LSDLB_CP <-> LSDFB_CP : Handshake with upstream app
+
+
+PFM_PP -> LSDAB_CP : Spawn LSDAB
+LSDAB_CP -> LSDAB_CP : Initialise IOClient (NammedPipeClient)
+LSDAB_CP -> PFM_PP : Connect IOClient to IOServer 
+PFM_PP <-> LSDAB_CP : Ping/Pong
+PFM_PP -> PFM_PP : Register LSDAB
+
+LSDAB_CP <-> LSDLB_CP : Handshake with upstream app
+
+PFM_PP -> LSDAB_CP : Spawn LSDAB
+LSDAB_CP -> LSDAB_CP : Initialise IOClient (NammedPipeClient)
+LSDAB_CP -> PFM_PP : Connect IOClient to IOServer 
+PFM_PP <-> LSDAB_CP : Ping/Pong
+PFM_PP -> PFM_PP : Register LSDAB
+
+LSDAB_CP <-> LSDLB_CP : Handshake with upstream app
+LSDLB_CP <-> LSDAB_CP : Handshake for Recycled Labels (Specified in Config Json)
+
+
+@enduml

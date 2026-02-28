@@ -1,0 +1,31 @@
+
+//Abstract Transformation Rationale D->I->K -> States of matter 
+F->U->A->C->CPF
+Sync and Async Primitives : Threads, Mutex, Semaphores, Condition Variables and Atomic Windows Events
+
+
+
+//Preprocessors
+
+//Pixel Structures // Data.h 
+
+// Abstract Pipe lines // Pipeline.h
+1. Public : Routing maps as per user
+2. Public : Start and Stop Threads: Reader Threads, Writer Threads and Dispatcher Thread
+3. Public: Event driven Decoupled Updates
+4. Protected: Modular Transformations using Core 
+5. Private:
+	structures for Thread Management for each Reader and Writer Pipelines
+6. Pipereader: Routine for one upstream event
+// Concrete Pipelines // Objects
+
+
+
+Knowledge:
+
+A hotpath is the portion of your program that executes most frequently or consumes the largest fraction of CPU time during normal operation; it is the code path that is "hot" because it dominates runtime cost. It can be a tight loop, a frequently called function, or a sequence of calls repeatedly reached by many inputs, and it is the part you should focus on when trying to reduce overall execution time because small improvements there yield the biggest payoff.
+A hotpath is related to but not identical with a "hotspot" or "critical path": a hotspot usually denotes a specific function or line that shows high cost in a profile, while the hotpath is the end-to-end route through code that cumulative costs flow along; the critical path emphasizes latency for a single operation, whereas a hotpath emphasizes aggregate cost over many runs. Hotpaths often expose performance issues like excessive allocations, syscalls, locks, cache-unfriendly memory access, or expensive library/runtime checks; they are also the places where instrumentation or atomic operations on the hot loop can cause disproportionate overhead.
+You identify hotpaths with profiling: sampling profilers and flame graphs quickly show which call stacks account for the most CPU time, and targeted instrumentation or microbenchmarks give precise per-call timings and allocation counts for short-lived routines. When optimizing a hotpath, make small, measurable changes, prefer algorithmic improvements and cheaper data-structure choices, reduce work-per-call (caching, avoid unnecessary allocations, minimize syscalls and locking), and always validate with before-and-after profiles to ensure you improved real performance without changing semantics.
+
+
+

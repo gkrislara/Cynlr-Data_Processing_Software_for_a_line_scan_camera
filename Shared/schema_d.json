@@ -1,0 +1,133 @@
+{
+  "services": [
+    {
+      "name": "LS_DGB",
+      "type": "stream_src",
+      "interfaces": [
+        {
+          "type": "Data",
+          "upstream": "",
+          "downstream": "LS_DFB"
+        }
+      ],
+      "inputs": {
+        "ENABLE": "Q",
+        "DISABLE": "X",
+        "SETUP_UPSTREAM": "U",
+        "SETUP_DOWNSTREAM": "D",
+        "SETUP_ROUTEMAP": "M",
+        "PING": "P",
+        "RNG": "R",
+        "CSV": "C",
+        "TOGGLE": "T"
+      }
+    },
+
+    {
+      "name": "LS_DFB",
+      "type": "stream_filter",
+      "interfaces": [
+        {
+          "type": "Data",
+          "upstream": "LS_DGB",
+          "downstream": "LS_DLB"
+        }
+      ],
+      "inputs": {
+        "ENABLE": "Q",
+        "DISABLE": "X",
+        "SETUP_UPSTREAM": "U",
+        "SETUP_DOWNSTREAM": "D",
+        "SETUP_ROUTEMAP": "M",
+        "PING": "P"
+      }
+    },
+
+    {
+      "name": "LS_DLB",
+      "type": "stream_filter",
+      "interfaces": [
+        {
+          "type": "Data",
+          "upstream": "LS_DFB",
+          "downstream": "LS_DAB"
+        },
+        {
+          "type": "AuxRecycledLables",
+          "upstream": "LS_DAB",
+          "downstream": ""
+        }
+      ],
+      "inputs": {
+        "ENABLE": "Q",
+        "DISABLE": "X",
+        "SETUP_UPSTREAM": "U",
+        "SETUP_DOWNSTREAM": "D",
+        "SETUP_ROUTEMAP": "M",
+        "PING": "P"
+      }
+    },
+
+    {
+      "name": "LS_DAB",
+      "type": "stream_filter",
+      "interfaces": [
+        {
+          "type": "Data",
+          "upstream": "LS_DLB",
+          "downstream": "LS_DLogB"
+        },
+        {
+          "type": "AuxFinalLabels",
+          "upstream": "",
+          "downstream": "LS_DLogB"
+        },
+        {
+          "type": "AuxRecycledLables",
+          "upstream": "",
+          "downstream": "LS_DLB"
+        }
+      ],
+      "inputs": {
+        "ENABLE": "Q",
+        "DISABLE": "X",
+        "SETUP_UPSTREAM": "U",
+        "SETUP_DOWNSTREAM": "D",
+        "SETUP_ROUTEMAP": "M",
+        "PING": "P"
+      }
+    },
+
+    {
+      "name": "LS_DLogB",
+      "type": "stream_sink",
+      "interfaces": [
+        {
+          "type": "Data",
+          "upstream": "LS_DAB",
+          "downstream": ""
+        },
+        {
+          "type": "AuxFinalLabels",
+          "upstream": "LS_DAB",
+          "downstream": ""
+        }
+      ],
+      "inputs": {
+        "ENABLE": "Q",
+        "DISABLE": "X",
+        "SETUP_UPSTREAM": "U",
+        "SETUP_DOWNSTREAM": "D",
+        "SETUP_ROUTEMAP": "M",
+        "PING": "P"
+      }
+    }
+  ],
+  "args": {
+    "T": 500,
+    "M": 11,
+    "V": 0.5f,
+    "CSV_FILE": "E:\\LS_PROD_BASELINE\\Test\\Test1.csv",
+    "VERBOSITY": "1"
+  }
+}
