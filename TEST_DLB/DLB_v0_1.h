@@ -53,7 +53,6 @@ public:
         c_pos = 0;
     }
 
-
     uint16_t algorithm(uint16_t vl)
     {
 		if (vl == 1) 
