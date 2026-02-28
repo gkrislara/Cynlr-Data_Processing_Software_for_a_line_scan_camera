@@ -184,6 +184,51 @@ public:
 	}
 };
 
+
+template <typename T, size_t k>
+class KModCounterW {
+	T count;
+
+public:
+
+	KModCounterW()
+	{
+		count = 0;
+	}
+
+	KModCounterW(T val) 
+	{
+		count = val;
+	}
+
+	T increment() {
+		return (count++ % k);
+	}
+
+	T getCount() const {
+		return count;
+	}
+
+	T decrement() {
+		return (count-- % k);
+	}
+
+	void reset() {
+		count = 0;
+	}
+
+	void setCount(T val) {
+		count = val;
+	}
+
+	void jumpTo(T val) {
+		count = val % k;
+	}
+};
+
+
+
+
 #endif// _WIN32
 
 
