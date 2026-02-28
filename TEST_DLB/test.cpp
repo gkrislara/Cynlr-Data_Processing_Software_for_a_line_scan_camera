@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "DLB_v0_1.h"
+#include "DLB_v0_0_2.h"
 
 #include "..\Shared\data.h"
 
@@ -50,8 +50,7 @@ static std::vector<uint32_t> runCCLk2(
             auto start = std::chrono::high_resolution_clock::now();
 
             inBlock[i].label = ccl.algorithm(static_cast<uint16_t>(inBlock[i].value));
-            ccl.push(inBlock[i].label);
-
+			ccl.push(inBlock[i].label);
 
             auto end = std::chrono::high_resolution_clock::now();
             auto mem_after = getCurrentMemoryUsageKB();

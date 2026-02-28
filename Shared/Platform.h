@@ -193,19 +193,19 @@ public:
 
 	KModCounterW()
 	{
-		count = 0;
+		count = 1;
 	}
 
 	KModCounterW(T val) 
 	{
-		count = val;
+		count = val % k ;
 	}
 
 	T increment() {
 		return (count++ % k);
 	}
 
-	T getCount() const {
+	T get() const {
 		return count;
 	}
 
@@ -214,14 +214,10 @@ public:
 	}
 
 	void reset() {
-		count = 0;
+		count = 1;
 	}
 
-	void setCount(T val) {
-		count = val;
-	}
-
-	void jumpTo(T val) {
+	void set(T val) {
 		count = val % k;
 	}
 };
