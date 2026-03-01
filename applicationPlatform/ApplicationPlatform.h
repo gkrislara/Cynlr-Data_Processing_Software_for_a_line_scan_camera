@@ -62,7 +62,7 @@ public:
 		}
 		if (processManager.attachProcesses())
 		{
-			// all processes are spawned and attached; start the command dispatcher
+			// all processes are spawned and attached; start the command dispatcher and the app monitor
 			processManager.start();
 			return true;
 		}

@@ -41,6 +41,7 @@ private:
 
 	bool status_ = false;
 
+	PROCESS_INFORMATION pi;
 public:
 
 	~ProcessManager() {
@@ -110,12 +111,10 @@ public:
 
 			std::vector<wchar_t> argList(arglist.begin(), arglist.end());
 
-			//TODO: Combine Arglists here
-
 			argList.push_back(L'\0'); // null-terminate
 
 			STARTUPINFOW si{ sizeof(si) };
-			PROCESS_INFORMATION pi;
+			
 
 			if (CreateProcessW(
 				exePath.c_str(),    // <— application name
@@ -254,8 +253,23 @@ public:
 	void maintainProcesses()
 	{
 		/* do the maintainance, health checks and robustness */
-		/* use notifyProcess wherever necessary for broadcast */
+
+		
+
+		/* Base Level Thread*/
+		/* check whether the PID exists */
+
+		/* if not, remove from map and brodcast deadbeef to all other apps to halt;
+			*/
+		/* if yes, check health by sending a command and waiting for reply with timeout. If timeout occurs, consider it unhealthy */
+			/* if unhealthy, notify and optionally try to restart based on the use case */
+				/* if restart successful, notify else consider it dead and remove from map and notify */
+
+
+		/*application lecel thread */
+				/* use notifyProcess wherever necessary for broadcast */
 		/* TODO: break this into Health with timeout, (thread) broadcast when error from any client, */
+
 
 
 	}
