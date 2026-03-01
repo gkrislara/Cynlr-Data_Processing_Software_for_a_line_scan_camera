@@ -53,7 +53,7 @@
           "downstream": "LS_DAB"
         },
         {
-          "type": "AuxRecycledLables",
+          "type": "Aux",
           "upstream": "LS_DAB",
           "downstream": ""
         }
@@ -78,12 +78,12 @@
           "downstream": "LS_DLogB"
         },
         {
-          "type": "AuxFinalLabels",
+          "type": "Aux",
           "upstream": "",
           "downstream": "LS_DLogB"
         },
         {
-          "type": "AuxRecycledLables",
+          "type": "Aux",
           "upstream": "",
           "downstream": "LS_DLB"
         }
@@ -108,7 +108,7 @@
           "downstream": ""
         },
         {
-          "type": "AuxFinalLabels",
+          "type": "Aux",
           "upstream": "LS_DAB",
           "downstream": ""
         }

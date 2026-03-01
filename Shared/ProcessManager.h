@@ -38,6 +38,7 @@ private:
 
 	std::atomic<bool> running_{ false };
 	std::thread dispatchThread_;
+	std::thread maintainanceThread_;
 
 	bool status_ = false;
 
@@ -253,9 +254,6 @@ public:
 	void maintainProcesses()
 	{
 		/* do the maintainance, health checks and robustness */
-
-		
-
 		/* Base Level Thread*/
 		/* check whether the PID exists */
 

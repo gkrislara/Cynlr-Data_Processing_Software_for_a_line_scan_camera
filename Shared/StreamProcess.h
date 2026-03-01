@@ -617,7 +617,44 @@ public:
 		}
 
 		running = true;
+
+		// Main idea is use IO Server to maintain process modularity and scalability
+		// current Sequence is alternative based on current implementation		
+		ProcessConfig_s config = processCLI.getProcessConfig();
+		
+		// 2. if present enable, DS, US and Map stream
+
+		for (const auto& interface_ : config.interfaces)
+		{
+			if (interface_.interfaceType == L"Data")
+			{
+				if (!interface_.downstream.empty())
+				{
+					requestDownstreamSetup = true;
+				}
+				if (!interface_.upstream.empty())
+				{
+					requestUpstreamSetup = true;
+				}
+
+			}
+			if (interface_.interfaceType == L"Aux")
+			{
+				if (!interface_.downstream.empty())
+				{
+					enableAux(interface_.downstream, true, interfaceDirection::DOWNSTREAM);
+				}
+				if (!interface_.upstream.empty())
+				{
+					enableAux(interface_.upstream, true, interfaceDirection::UPSTREAM);
+				}
+
+			}
+		} 
+
 		ioSetupThread = std::thread(&StreamProcess::ioSetupLoop, this);
+
+		setupRoutingMap();
 	}
 
 	void setupUpstream()
@@ -804,9 +841,9 @@ public:
 		{
 			case 'Q': start(); break;
 			case 'X': stop(); break;
-			case 'U': requestUpstreamSetup = true; break;
-			case 'D': requestDownstreamSetup = true; break;
-			case 'M': setupRoutingMap(); break;
+			//case 'U': requestUpstreamSetup = true; break;
+			//case 'D': requestDownstreamSetup = true; break;
+			//case 'M': setupRoutingMap(); break; 
 			case 'P': ProcessClient::update(commandId); break;
 			default: stop(); break;
 		}
@@ -816,3 +853,6 @@ protected:
 	virtual std::array<T,streamWidth> core(std::array<T,streamWidth>& data) = 0;
 
 };
+
+
+
