@@ -1,6 +1,14 @@
 ﻿#include <iostream>
 #include "LS_DGB.h"
 
+//TODO: Profile with DFB and DLB to check for bottlenecks and optimize for 
+// 1.comm latency(ui and apps)
+//2. per block latency
+//3. jitter
+//4.overall execution time
+//5. max throughput
+
+
 std::wstring GetOwnPath()
 {
     wchar_t buf[MAX_PATH];
