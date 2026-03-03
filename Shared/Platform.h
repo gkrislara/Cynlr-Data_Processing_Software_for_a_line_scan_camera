@@ -184,6 +184,46 @@ public:
 	}
 };
 
+
+template <typename T>
+class KModCounterW : public CircularBufferFilterW <T>{
+	T label;
+	size_t sz;
+
+
+public:
+
+	KModCounterW(size_t size) : CircularBufferFilterW<T>(size, 0)
+	{
+		label = 0;
+		sz = size;
+	}
+
+	void increment(size_t h, T offset) {
+		label = CircularBufferFilterW<T>::getBufferAt(h);
+		label = (label + 1 +  offset) % UINT16_MAX ;
+		CircularBufferFilterW<T>::setBufferAt(h, label);
+	}
+
+	T get(size_t h) {
+		return  CircularBufferFilterW<T>::getBufferAt(h);
+	}
+
+	void decrement(size_t h) {
+		label = CircularBufferFilterW<T>::getBufferAt(h);
+		label = (label - 1) % UINT16_MAX;
+		CircularBufferFilterW<T>::setBufferAt(h, label);
+	}
+
+	void reset(size_t h) {
+		CircularBufferFilterW<T>::setBufferAt(h, 0);
+	}
+
+	void set(size_t h, T val) {
+		CircularBufferFilterW<T>::setBufferAt(h, val);
+	}
+};
+
 #endif// _WIN32
 
 

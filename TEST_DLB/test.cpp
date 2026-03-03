@@ -43,15 +43,12 @@ static std::vector<uint32_t> runCCLk2(
         Pixel inBlock[2], outBlock[2];
         for (int i = 0; i < k; ++i) {
             inBlock[i] = { image[idx], idx / width, uint32_t(idx % width), 0};
-            
-            ++idx;
 
             auto mem_before = getCurrentMemoryUsageKB();
             auto start = std::chrono::high_resolution_clock::now();
 
             inBlock[i].label = ccl.algorithm(static_cast<uint16_t>(inBlock[i].value));
-            ccl.push(inBlock[i].label);
-
+		
 
             auto end = std::chrono::high_resolution_clock::now();
             auto mem_after = getCurrentMemoryUsageKB();
@@ -61,6 +58,8 @@ static std::vector<uint32_t> runCCLk2(
 			avg_mem += (mem_after - mem_before);
             
             labels.push_back(inBlock[i].label);
+            ++idx;
+
         }
     }
 	avg_latency /= int(image.size());
@@ -119,24 +118,24 @@ TEST(CCL_LShape, LShapeMerge) {
     EXPECT_EQ(labels, expect);
 }
 
-//TEST(CCL_Checkerboard3x3_And_A_Seperate_Region_With_Perf, AllConnectedByDiagonal) {
-//    std::vector<uint8_t> img = {
-//      1,0,1,0,1,0,0,1,1,1,0,1,1,0,
-//      0,1,0,1,0,1,0,1,1,1,0,1,1,0,
-//      1,0,1,0,1,0,0,1,1,1,0,1,1,0
-//    };
-//
-//    auto labels = runCCLk2(14, 3, img);
-//
-//    // all 1s merge via diagonal => all get label 1
-//    std::vector<uint32_t> expect = {
-//      1,0,2,0,3,0,0,4,4,4,0,5,5,0,
-//      0,1,0,1,0,1,0,4,4,4,0,5,5,0,
-//      1,0,1,0,1,0,0,4,4,4,0,5,5,0
-//    };
-//    EXPECT_EQ(labels, expect);
-//
-//}
+TEST(CCL_Checkerboard3x3_And_A_Seperate_Region_With_Perf, AllConnectedByDiagonal) {
+    std::vector<uint8_t> img = {
+      1,0,1,0,1,0,0,1,1,1,0,1,1,0,
+      0,1,0,1,0,1,0,1,1,1,0,1,1,0,
+      1,0,1,0,1,0,0,1,1,1,0,1,1,0
+    };
+
+    auto labels = runCCLk2(14, 3, img);
+
+    // all 1s merge via diagonal => all get label 1
+    std::vector<uint32_t> expect = {
+      1,0,2,0,3,0,0,4,4,4,0,5,5,0,
+      0,1,0,1,0,1,0,4,4,4,0,5,5,0,
+      1,0,1,0,1,0,0,4,4,4,0,5,5,0
+    };
+    EXPECT_EQ(labels, expect);
+
+}
 
 //TEST(CCL_PS_With_Perf) {
 //    // Same as problem statement 
