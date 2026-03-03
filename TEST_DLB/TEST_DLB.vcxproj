@@ -98,6 +98,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="DLB.h" />
+    <ClInclude Include="DLB_v0_0_2.h" />
     <ClInclude Include="DLB_v0_1.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
