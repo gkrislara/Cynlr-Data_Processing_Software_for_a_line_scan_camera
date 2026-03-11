@@ -138,7 +138,7 @@ public:
 		col = 0;
 		row = 0;
 
-		// RNG
+		// TODO: RNG Setup - create a parameterised private method 
 		RNGSource.sourceType = SourceType_e::RNG;
 		std::random_device rd;
 		std::mt19937_64 eng(rd());

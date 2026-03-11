@@ -99,7 +99,11 @@ public:
                increment nextlabel
                and
                return the value of next label*/
-            if (templbl > 0) return templbl;
+            if (templbl > 0)
+            {
+                return templbl;
+
+            }
             else return nextLabel++;
         }
         else return 0;

@@ -46,12 +46,12 @@ public:
 
 		data[0].col = 1;
 		data[0].row = 1;
-		data[0].label.labelValue = 1;
+		data[0].label = 1;
 		data[0].value = 250;
 
 		data[1].col = 2;
 		data[1].row = 2;
-		data[1].label.labelValue = 2;
+		data[1].label = 2;
 		data[1].value = 125;
 
 		return data;

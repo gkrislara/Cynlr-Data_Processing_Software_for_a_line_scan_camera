@@ -30,10 +30,13 @@ class ConnectedComponentLabeller : public CircularBufferFilterW<uint16_t>
         if (L == 0)     L = l;
         else if (l != L)
         {
-            uint16_t tmp = std::min(l, L);
+            //uint16_t tmp = std::min(l, L);
             /* any other label - merge inplace with out having to have a seperate buffer */
-            CircularBufferFilterW<uint16_t>::setBufferAt(idx, tmp);
+            CircularBufferFilterW<uint16_t>::setBufferAt(idx, L);
         }
+
+		//Perform union -find like path compression for future merges to be faster. This is to ensure that the equivalence classes are flattened and future lookups are O(1) on average.
+
     }
 
     uint16_t labelWithEquivalenceAndMerge(uint16_t pos, uint16_t val, uint16_t row, uint16_t col)

@@ -5,23 +5,28 @@
 #include "..\Shared\Data.h"
 #include <stdint.h>
 #include <algorithm>
+#include <vector>
 
 
 #ifdef min
 #undef min
 #endif
 
+#ifdef max
+#undef max
+#endif
 
 template <size_t k> //numpixels
-class ConnectedComponentLabeller: public KModCounterW<uint16_t>
+class ConnectedComponentLabeller: public CircularBufferFilterW<uint16_t>
 {
 	 
 	 uint16_t width;
 	 uint32_t sz;
 	 uint16_t c_head;
 	 uint16_t c_pos;
-	 uint16_t templbl;
 	 uint16_t label;
+
+	 std::vector<uint16_t> parent_label;
 
 	 uint16_t neighbourOf(uint8_t i, size_t pos)
 	 {				
@@ -32,51 +37,43 @@ class ConnectedComponentLabeller: public KModCounterW<uint16_t>
 				(pos + sz - uint32_t(width) + 1) % sz   // top-right
 		 };
 
-		 return KModCounterW::get(nbr[i]);
+		 return CircularBufferFilterW::getBufferAt(nbr[i]);
 	 }
 	 
 public:
 
-	ConnectedComponentLabeller(uint32_t size) : KModCounterW<uint16_t>(size + k + 1)
+	ConnectedComponentLabeller(uint32_t size) : CircularBufferFilterW<uint16_t>(size + k + 1)
 	{
 		width = size;
 		sz = size + k + 1;
-		templbl = UINT16_MAX;
 		c_head = 0;
 		label = 1;
 		c_pos = 0;
 
 		/* initialize the buffer with 0s, head at 0, tail at 0, count at 0*/
-		for (uint16_t i = 0; i < sz; i++)
-		{
-			KModCounterW<uint16_t>::reset(i);
-		}
 
 		CircularBufferFilterW<uint16_t>::clear();
 	}
 
-	uint16_t algorithm(uint8_t val)
+	uint16_t algorithm(uint16_t val)
 	{
-		c_head = KModCounterW::getHead();
+		c_head = CircularBufferFilterW::getHead();
 		c_pos = (c_head - 1) % sz;
-		if (val == 0)
-		{	
-			KModCounterW<uint16_t>::reset(c_pos);
-			KModCounterW<uint16_t>::incrementHead();
-			return KModCounterW<uint16_t>::get(c_pos);
 
-			 /* if the value is 0, return 0 and increment head */
-			 /* else, if the value is 1, check the neighbours and return the label according to the rules */
-			 /* if no non-zero neighbour, create new label and return it*/
-		}
+		if (CircularBufferFilterW<uint16_t>::getBufferAt(c_pos) == 0)
+			return 0;
+
 		else
 		{
-			if (KModCounterW::level() == 0)
+
+			uint16_t row = CircularBufferFilterW<uint16_t>::level() / width;
+			uint16_t col = CircularBufferFilterW<uint16_t>::level() % width;
+
+			if (CircularBufferFilterW::level() == 0)
 			{
 				/* The first 1' will get label 1 */
-				KModCounterW<uint16_t>::set(c_pos, label);
-				KModCounterW<uint16_t>::incrementHead();
-				return KModCounterW<uint16_t>::get(c_pos);
+				CircularBufferFilterW<uint16_t>::setBufferAt(c_pos, label);
+				return CircularBufferFilterW<uint16_t>::getBufferAt(c_pos);
 			}
 			else
 			{
@@ -84,22 +81,19 @@ public:
 				/* in buffer,
 					from the position of head */
 
-				uint16_t row = KModCounterW<uint16_t>::level() / width;
-				uint16_t col = KModCounterW<uint16_t>::level() % width;
+
 
 				if (row == 0)
 				{
 					if (neighbourOf(0, c_pos) == 0)
 					{
-						KModCounterW<uint16_t>::increment(c_pos,label++);
-						KModCounterW<uint16_t>::incrementHead();
-						return KModCounterW<uint16_t>::get(c_pos);
+						CircularBufferFilterW<uint16_t>::setBufferAt(c_pos,label++);
+						return CircularBufferFilterW<uint16_t>::getBufferAt(c_pos);
 					}
-					else
+					else // Assumption : label assigned already
 					{
 						templbl = neighbourOf(0, c_pos);
-						KModCounterW<uint16_t>::set(c_pos, templbl);
-						KModCounterW<uint16_t>::incrementHead();
+						CircularBufferFilterW<uint16_t>::setBufferAt(c_pos, templbl);
 						return templbl;
 					}
 
@@ -120,15 +114,13 @@ public:
 
 					if(zerocount == 2)
 					{
-						KModCounterW<uint16_t>::increment(c_pos,label++);
-						KModCounterW<uint16_t>::incrementHead();
-						return KModCounterW<uint16_t>::get(c_pos);
+						CircularBufferFilterW<uint16_t>::setBufferAt(c_pos,label++);
+						return CircularBufferFilterW<uint16_t>::getBufferAt(c_pos);
 					}
 					else
 					{
-						KModCounterW<uint16_t>::set(c_pos, templbl);
-						KModCounterW<uint16_t>::incrementHead();
-						return KModCounterW<uint16_t>::get(c_pos);
+						CircularBufferFilterW<uint16_t>::setBufferAt(c_pos, templbl);
+						return CircularBufferFilterW<uint16_t>::getBufferAt(c_pos);
 					}
 				}
 				else if (col == (width - 1))
@@ -145,15 +137,13 @@ public:
 					}
 
 					if (zerocount == 3) {
-						KModCounterW<uint16_t>::increment(c_pos,label++);
-						KModCounterW<uint16_t>::incrementHead();
-						return KModCounterW<uint16_t>::get(c_pos);
+						CircularBufferFilterW<uint16_t>::setBufferAt(c_pos,label++);
+						return CircularBufferFilterW<uint16_t>::getBufferAt(c_pos);
 					}
 					else
 					{
-						KModCounterW<uint16_t>::set(c_pos, templbl);
-						KModCounterW<uint16_t>::incrementHead();
-						return KModCounterW<uint16_t>::get(c_pos);
+						CircularBufferFilterW<uint16_t>::setBufferAt(c_pos, templbl);
+						return CircularBufferFilterW<uint16_t>::getBufferAt(c_pos);
 					}
 				}
 				else
@@ -173,18 +163,124 @@ public:
 
 					if(zerocount == 4)
 					{
-						KModCounterW<uint16_t>::increment(c_pos,label++);
-						KModCounterW<uint16_t>::incrementHead();
-						return KModCounterW<uint16_t>::get((c_pos - 1) % sz);
+						CircularBufferFilterW<uint16_t>::setBufferAt(c_pos,label++);
+						return CircularBufferFilterW<uint16_t>::getBufferAt((c_pos - 1) % sz);
 					}
 					else
 					{
-						KModCounterW<uint16_t>::set(c_pos, templbl);
-						KModCounterW<uint16_t>::incrementHead();
-						return KModCounterW<uint16_t>::get(c_pos);
+						CircularBufferFilterW<uint16_t>::setBufferAt(c_pos, templbl);
+						return CircularBufferFilterW<uint16_t>::getBufferAt(c_pos);
 					}
 				}
 			}
 		}
 	}
 };
+
+
+
+
+//template <size_t k> // numpixels
+//class ConnectedComponentLabeller : public CircularBufferFilterW<uint16_t>
+//{
+//    uint16_t width;
+//    uint32_t sz;
+//    uint16_t label;
+//    std::vector<uint16_t> parent_label;
+//
+//    // Union-find helpers
+//    uint16_t find(uint16_t x)
+//    {
+//        if (x == 0) return 0;
+//        if (parent_label[x] != x)
+//            parent_label[x] = find(parent_label[x]);
+//        return parent_label[x];
+//    }
+//
+//    void unite(uint16_t x, uint16_t y)
+//    {
+//        if (x == 0 || y == 0) return;
+//        uint16_t xr = find(x);
+//        uint16_t yr = find(y);
+//        if (xr != yr)
+//            parent_label[std::max(xr, yr)] = std::min(xr, yr);
+//    }
+//
+//    uint16_t neighbourOf(uint8_t i, size_t pos)
+//    {
+//        uint32_t nbr[4] = {
+//            (pos + sz - 1) % sz,                        // left
+//            (pos + sz - uint32_t(width) - 1) % sz,      // top-left
+//            (pos + sz - uint32_t(width)) % sz,          // top
+//            (pos + sz - uint32_t(width) + 1) % sz       // top-right
+//        };
+//        return CircularBufferFilterW<uint16_t>::getBufferAt(nbr[i]);
+//    }
+//
+//public:
+//    ConnectedComponentLabeller(uint32_t size)
+//        : CircularBufferFilterW<uint16_t>(size + k + 1,0)
+//    {
+//        width = size;
+//        sz = size + k + 1;
+//        label = 1;
+//        parent_label.resize(sz * 2, 0); // Large enough for all possible labels
+//        CircularBufferFilterW<uint16_t>::clear();
+//    }
+//
+//    // Call this for each pixel (0=background, 1=foreground)
+//    uint16_t algorithm(uint8_t pixelValue)
+//    {
+//        // Advance buffer head for new pixel
+//        uint16_t c_head = CircularBufferFilterW<uint16_t>::getHead();
+//        uint16_t c_pos = (c_head - 1) % sz;
+//
+//        if (pixelValue == 0)
+//        {
+//            CircularBufferFilterW<uint16_t>::push(0);
+//            return 0;
+//        }
+//
+//        // Gather neighbor labels
+//        uint16_t n[4];
+//        for (int i = 0; i < 4; ++i)
+//            n[i] = neighbourOf(i, c_pos);
+//
+//        // Find minimum nonzero label among neighbors
+//        uint16_t minLabel = UINT16_MAX;
+//        for (int i = 0; i < 4; ++i)
+//            if (n[i] != 0)
+//                minLabel = std::min(minLabel, find(n[i]));
+//
+//        if (minLabel == UINT16_MAX)
+//        {
+//            // No labeled neighbors, assign new label
+//            CircularBufferFilterW<uint16_t>::push(label);
+//            parent_label[label] = label;
+//            return label++;
+//        }
+//        else
+//        {
+//            // Assign min label and merge equivalences
+//            CircularBufferFilterW<uint16_t>::push(minLabel);
+//            for (int i = 0; i < 4; ++i)
+//                if (n[i] != 0 && find(n[i]) != minLabel)
+//                    unite(minLabel, n[i]);
+//            return minLabel;
+//        }
+//    }
+//
+//    // Optional: flatten all label equivalences after processing
+//    void flattenLabels()
+//    {
+//        for (uint16_t i = 1; i < label; ++i)
+//            parent_label[i] = find(i);
+//    }
+//
+//    // Get resolved label for a given buffer index
+//    uint16_t getResolvedLabel(uint32_t idx)
+//    {
+//        uint16_t raw = CircularBufferFilterW<uint16_t>::getBufferAt(idx);
+//        return raw ? find(raw) : 0;
+//    }
+//};

@@ -85,8 +85,10 @@ public:
 	
 	bool isFull() const { return (((head + 1) % bufferSize) == tail) ; }
 	
-	bool isEmpty() const { return ((head == 0) && (tail == 0)); }
-	
+	bool isEmpty() const {
+		return ((head == 0) && (tail == 0) && (count == 0)) ; 
+	}
+
 	void clear() {
 #if thread_safety
 		std::lock_guard<std::mutex> lock(mtx);
@@ -124,6 +126,15 @@ public:
 				cnt++;
 		}
 		return cnt;
+	}
+
+	void incrementHead()
+	{
+		head = (head + 1) % bufferSize;
+		if (head == tail) { // If head catches up with tail, we overwrite the oldest item
+			tail = (tail + 1) % bufferSize;
+		}
+		count++;
 	}
 
 

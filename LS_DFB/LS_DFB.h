@@ -43,7 +43,7 @@ public:
 			preProcessor->push(static_cast<float>(data[i].value));
 			float filteredValue = preProcessor->algorithm();
 			// Apply threshold
-			data[i].value = 1 ? (filteredValue >= threshold) : 0;
+			data[i].value = (filteredValue >= threshold) ? 1 : 0;
 		}
 		return data;
 	}

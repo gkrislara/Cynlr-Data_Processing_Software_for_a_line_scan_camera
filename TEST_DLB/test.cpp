@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "DLB_v0_1.h"
+#include "DLB.h"
 
 #include "..\Shared\data.h"
 
@@ -46,8 +46,8 @@ static std::vector<uint32_t> runCCLk2(
 
             auto mem_before = getCurrentMemoryUsageKB();
             auto start = std::chrono::high_resolution_clock::now();
-
-            inBlock[i].label = ccl.algorithm(static_cast<uint16_t>(inBlock[i].value));
+			ccl.push(inBlock[i].label); // push the label to advance the buffer head for new pixel
+            inBlock[i].label = ccl.algorithm(static_cast<uint16_t>(inBlock[i].value), static_cast<uint16_t>(inBlock[i].row), static_cast<uint16_t>(inBlock[i].col));
 		
 
             auto end = std::chrono::high_resolution_clock::now();
@@ -137,138 +137,56 @@ TEST(CCL_Checkerboard3x3_And_A_Seperate_Region_With_Perf, AllConnectedByDiagonal
 
 }
 
-//TEST(CCL_PS_With_Perf) {
-//    // Same as problem statement 
-//    std::vector<uint8_t> img = {
-//       0,1,0,0,0,0,1,1,0,1,0,1,
-//       0,0,1,0,0,0,1,0,0,1,1,0,
-//       1,0,0,1,0,1,0,0,0,1,0,0,
-//       0,1,1,0,0,1,0,0,1,0,0,1,
-//       0,1,0,1,0,0,1,1,0,0,1,0,
-//       0,0,0,0,0,0,0,0,1,0,0,0
-//    };
-//
-//
-//    auto labels = runCCLk2(12, 6, img);
-//
-//
-//
-//    // 5 is not replaced by 1 as the connected is scanned clockwise from near left to top right. Merging happens in the Tracing and computation block
-//    std::vector<uint32_t> expect = {
-//        0,1,0,0,0,0,2,2,0,3,0,4,
-//        0,0,1,0,0,0,2,0,0,3,3,0,
-//        5,0,0,1,0,2,0,0,0,3,0,0,
-//        0,5,5,0,0,2,0,0,3,0,0,6,
-//        0,5,0,5,0,0,2,2,0,0,6,0,
-//        0,0,0,0,0,0,0,0,2,0,0,0
-//    };
-//    /*  EXPECT_EQ(labels, expect);*/
-//    //for (size_t i = 0; i < 12 * 6; ++i) {
-//    EXPECT_EQ(labels, expect);
-//    //}
-//}
-
-//TEST(CCL_ZigZag2x4, SingleChain) {
-//    // Zig-zag chain in a 2x4 image:
-//    // 1 0
-//    // 0 1
-//    // 1 0
-//    // 0 1
-//    std::vector<uint8_t> img = {
-//      1,0,
-//      0,1,
-//      1,0,
-//      0,1
-//    };
-//    auto labels = runCCLk2(2, 4, img);
-//    // each 1 connects diagonally to the previous => all 1s label=1
-//    std::vector<uint32_t> expect = {
-//      1,0,
-//      0,1,
-//      1,0,
-//      0,1
-//    };
-//    EXPECT_EQ(labels, expect);
-//}
+TEST(CCL_PS_With_Perf) {
+    // Same as problem statement 
+    std::vector<uint8_t> img = {
+       0,1,0,0,0,0,1,1,0,1,0,1,
+       0,0,1,0,0,0,1,0,0,1,1,0,
+       1,0,0,1,0,1,0,0,0,1,0,0,
+       0,1,1,0,0,1,0,0,1,0,0,1,
+       0,1,0,1,0,0,1,1,0,0,1,0,
+       0,0,0,0,0,0,0,0,1,0,0,0
+    };
 
 
-/* Add test cases from the block */
+    auto labels = runCCLk2(12, 6, img);
 
-//TEST(INTEGRATION_TEST, INTG)
-//{ 
-//    std::vector<uint8_t> img = {
-//        0,0,0,0,0,0,0,0,0,1,1,
-//        1,1,0,0,0,0,0,1,1,1,1,
-//        1,1,1,1,1,0,1,1,1,1,1,
-//        0,0,0,0,0,0,0,0,0,0,0,
-//        0,1,1,1,0,0,0,0,1,1,1,
-//        1,1,1,1,1,1,0,1,1,0,0,
-//        0,0,0,1,1,1,0,0,1,0,0,
-//        1,1,1,1,1,1,0,0,0,0,0,
-//        1,0,0,0,0,0,1,1,1,1,1,
-//        1,1,1,1,1,1,0,0,0,0,1,
-//        1,1,1,1,1,0,0,0,0,1,1,
-//        0,0,0,0,0,0,1,1,0,1,1,
-//        0,0,1,1,1,1,1,1,1,1,0,
-//        0,0,0,0,0,0,1,1,1,1,1,
-//        1,1,1,1,1,1,1,1,1,1,0,
-//        0,0,0,0,0,0,0,0,0,0,0,
-//        0,0,0,1,1,1,1,1,1,1,0,
-//        0,0,0,0,0,1,1,1,1,1,1,
-//        1,1,1,1,1,1,1,1,1,1,1,
-//        0,0,0,0,0,0,0,0,1,1,1,
-//        1,1,1,1,1,0,0,0,1,1,1,
-//        1,1,0,0,0,0,0,1,1,1,1,
-//        0,0,0,0,0,0,0,0,0,0,1,
-//        1,1,0,0,1,1,1,1,1,1,0,
-//        0,0,0,1,1,1,1,0,0,0,0,
-//        0,1,1,1,1,0,0,0,0,0,0,
-//        0,0,0,1,0,0,0,1,1,1,1,
-//        1,1,0,0,0,0,0,0,0,1,1,
-//        1,1,0,0,0,1,1,1,1,0,0,
-//        0,1,1,1,0,0,1,0,0,0,1,
-//        1,0,0,1,1,1,0,0,0,1,0,
-//        0,0,0,1,1,1,1,1,0,0,1,
-//        1,1,1,1,1,1,0,0,0,1,1
-//    };
-//
-//    auto labels = runCCLk2(11, 33, img);
-//
-//    std::vector<uint32_t> expect = {
-//        0,0,0,0,0,0,0,0,0,1,1,
-//        2,2,0,0,0,0,0,1,1,1,1,
-//        2,2,2,2,2,0,1,1,1,1,1,
-//        0,0,0,0,0,0,0,0,0,0,0,
-//        0,3,3,3,0,0,0,0,4,4,4,
-//        3,3,3,3,3,3,0,4,4,0,0,
-//        0,0,0,3,3,3,0,0,4,0,0,
-//        5,5,5,3,3,3,0,0,0,0,0,
-//        5,0,0,0,0,0,3,3,3,3,3,
-//        3,3,3,3,3,3,0,0,0,0,3,
-//        3,3,3,3,3,0,0,0,0,3,3,
-//        0,0,0,0,0,0,6,6,0,3,3,
-//        0,0,7,7,7,3,3,3,3,3,0,
-//        0,0,0,0,0,0,3,3,3,3,3,
-//        8,8,8,8,8,8,3,3,3,3,0,
-//        0,0,0,0,0,0,0,0,0,0,0,
-//        0,0,0,9,9,9,9,9,9,9,0,
-//        0,0,0,0,0,9,9,9,9,9,9,
-//        10,10,10,10,9,9,9,9,9,9,9,
-//        0,0,0,0,0,0,0,0,9,9,9,
-//        11,11,11,11,11,0,0,0,9,9,9,
-//        11,11,0,0,0,0,0,9,9,9,9,
-//        0,0,0,0,0,0,0,0,0,0,9,
-//        12,12,0,0,13,13,13,13,13,9,0,
-//        0,0,0,9,9,9,9,0,0,0,0,
-//        0,14,9,9,9,0,0,0,0,0,0,
-//        0,0,0,9,0,0,0,15,15,15,15,
-//        16,16,0,0,0,0,0,0,0,15,15,
-//        16,16,0,0,0,17,17,17,15,0,0,
-//        0,16,16,16,0,0,15,0,0,0,18,
-//        16,0,0,16,16,15,0,0,0,18,0,
-//        0,0,0,15,15,15,15,15,0,0,18,
-//        19,19,19,15,15,15,0,0,0,18,18
-//    };
-//
-//    EXPECT_EQ(labels, expect);
-//}
+
+
+    // 5 is not replaced by 1 as the connected is scanned clockwise from near left to top right. Merging happens in the Tracing and computation block
+    std::vector<uint32_t> expect = {
+        0,1,0,0,0,0,2,2,0,3,0,4,
+        0,0,1,0,0,0,2,0,0,3,3,0,
+        5,0,0,1,0,2,0,0,0,3,0,0,
+        0,5,5,0,0,2,0,0,3,0,0,6,
+        0,5,0,5,0,0,2,2,0,0,6,0,
+        0,0,0,0,0,0,0,0,2,0,0,0
+    };
+    /*  EXPECT_EQ(labels, expect);*/
+    //for (size_t i = 0; i < 12 * 6; ++i) {
+    EXPECT_EQ(labels, expect);
+    //}
+}
+
+TEST(CCL_ZigZag2x4, SingleChain) {
+    // Zig-zag chain in a 2x4 image:
+    // 1 0
+    // 0 1
+    // 1 0
+    // 0 1
+    std::vector<uint8_t> img = {
+      1,0,
+      0,1,
+      1,0,
+      0,1
+    };
+    auto labels = runCCLk2(2, 4, img);
+    // each 1 connects diagonally to the previous => all 1s label=1
+    std::vector<uint32_t> expect = {
+      1,0,
+      0,1,
+      1,0,
+      0,1
+    };
+    EXPECT_EQ(labels, expect);
+}
